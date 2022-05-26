@@ -11,13 +11,18 @@ def read_from_excel():
     df = pd.read_excel(path, sheet_name='Sheet2')
     partList = []
     for row in df.itertuples():
-        # 定义一个字典用于存储从excel表格读取的数据
+        # 定义一个字典用于存储从excel表格存储的数据
         part = {"partNumber": getattr(row, '物料号'), "materialType": getattr(row, '物料类型'),
-                "description": getattr(row, '物料描述'), "unitOfMeasure": getattr(row, '基本计量单位'), "gmpName": ""}
+                "description": getattr(row, '物料描述'), "unitOfMeasure": getattr(row, '基本计量单位'), "gmpName": "",
+                "materialGroup": ""}
         if getattr(row, '产成品通用名') != "":
             part["gmpName"] = getattr(row, '产成品通用名')
         else:
             part["gmpName"] = "NA"
+        if getattr(row, '物料组') != "":
+            part["materialGroup"] = getattr(row, '物料组')
+        else:
+            part["materialGroup"] = "NA"
         partList.append(part)
     return partList
 
@@ -40,4 +45,6 @@ if __name__ == '__main__':
     partList = read_from_excel()
     for j in range(len(partList)):
         send_to_queue(json.dumps(partList[j]))  # 发送消息到ACTIVEMQ（将Python字典转为JSON数据传输）
-        sleep(3)  # 睡眠3秒，预留服务器插写入数据时间
+        # print('Send Msg--->'+json.dumps(partList[j])+' completed')
+        sleep(1)  # 睡眠1秒，预留服务器插写入数据时间
+        # print(partList[j])
